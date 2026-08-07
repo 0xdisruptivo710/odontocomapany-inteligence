@@ -4,6 +4,7 @@ import { BULK_CONCURRENCY, OPT_OUT_TAGS, TABLE_LOG, WTS_RATE_LIMIT_MS } from '@/
 import { sleep } from '@/lib/utils';
 import { signMessage } from '@/lib/validation';
 import { UNITS, attendantById, columnLeaf, compositeKey } from '@/lib/units';
+import { asArray } from '@/lib/jsonb';
 import {
   wtsApplyTagById,
   wtsCreateCard,
@@ -58,7 +59,9 @@ export async function approveOne({
 
   // Opt-out vence tudo. Se o paciente pediu para não ser procurado, nem a
   // etiqueta nem o card devem ser mexidos por automação.
-  const optOut = (row.current_tag_names ?? []).some((t) =>
+  // asArray porque a coluna jsonb volta como string (ver src/lib/jsonb.ts):
+  // `.some()` direto estouraria aqui do mesmo jeito que o `.join()` no drawer.
+  const optOut = asArray<string>(row.current_tag_names).some((t) =>
     OPT_OUT_TAGS.includes(String(t).toLowerCase().trim()),
   );
   if (optOut) {

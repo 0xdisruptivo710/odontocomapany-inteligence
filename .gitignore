@@ -15,3 +15,4 @@ dist
 
 # Per-client secrets (tokens, keys) — never commit
 client_vars_*.md
+.env*

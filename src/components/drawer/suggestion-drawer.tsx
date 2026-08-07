@@ -19,6 +19,7 @@ import { useReject } from '@/hooks/use-reject';
 import type { PanelMapping } from '@/hooks/use-panel-mapping';
 import type { TagsCatalog } from '@/hooks/use-tags-catalog';
 import { validateMessage } from '@/lib/validation';
+import { asArray, asObject } from '@/lib/jsonb';
 import { COLUMN_NAMES, UNITS, attendantById, columnLeaf } from '@/lib/units';
 import { TAG_TAXONOMY_FLAT } from '@/lib/constants';
 import { anonymizePhone, formatDateTime } from '@/lib/format';
@@ -53,7 +54,11 @@ export function SuggestionDrawer({
 
   const validation = useMemo(() => validateMessage(text), [text]);
 
-  const meta = (row?.raw_session_meta ?? {}) as SessionMeta;
+  // As colunas jsonb voltam do Supabase como STRING (o n8n grava com
+  // JSON.stringify). Sem normalizar, `current_tag_names.join()` estoura e o
+  // bloco do card some sem avisar. Ver src/lib/jsonb.ts.
+  const meta = asObject<SessionMeta>(row?.raw_session_meta);
+  const tagNames = asArray<string>(row?.current_tag_names);
   const attendant = attendantById(row?.responsible_user_id ?? null);
   const cardStatus = (meta.card?.status ?? '').toUpperCase();
   const cardFinal = cardStatus === 'WON' || cardStatus === 'LOST';
@@ -210,10 +215,8 @@ export function SuggestionDrawer({
                 antes de poder ser aplicada.
               </p>
             )}
-            {row.current_tag_names && row.current_tag_names.length > 0 && (
-              <p className="text-[11.5px] text-subtle-foreground">
-                Já tem: {row.current_tag_names.join(', ')}
-              </p>
+            {tagNames.length > 0 && (
+              <p className="text-[11.5px] text-subtle-foreground">Já tem: {tagNames.join(', ')}</p>
             )}
           </section>
 

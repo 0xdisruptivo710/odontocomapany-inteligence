@@ -30,8 +30,14 @@ export type SuggestionRow = {
   confidence: number | null;
   no_history: boolean | null;
 
-  current_tag_ids: string[] | null;
-  current_tag_names: string[] | null;
+  /**
+   * Colunas jsonb. Tipadas como `unknown` de propósito: o n8n grava com
+   * JSON.stringify e o Supabase devolve STRING, não array. Declarar `string[]`
+   * aqui foi o que deixou `.join()` compilar e quebrar em produção.
+   * Passe sempre por `asArray`/`asObject` de src/lib/jsonb.ts.
+   */
+  current_tag_ids: unknown;
+  current_tag_names: unknown;
   tag_applied: string | null;
   suggested_tag_id: string | null;
 
@@ -59,7 +65,8 @@ export type SuggestionRow = {
   wts_card_created_at: string | null;
   wts_message_sent_at: string | null;
   wts_message_id: string | null;
-  wts_errors: Record<string, WtsErrorEntry> | null;
+  /** jsonb — ver nota acima. */
+  wts_errors: unknown;
 
   tokens_input: number | null;
   tokens_output: number | null;

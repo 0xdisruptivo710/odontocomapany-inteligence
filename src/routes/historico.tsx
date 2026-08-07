@@ -9,7 +9,8 @@ import { useOperator } from '@/hooks/use-operator';
 import { useRealtime } from '@/hooks/use-realtime';
 import { useHistory } from '@/hooks/use-history';
 import { formatDateTime } from '@/lib/format';
-import type { SuggestionRow } from '@/lib/types';
+import { asObject } from '@/lib/jsonb';
+import type { SuggestionRow, WtsErrorEntry } from '@/lib/types';
 
 function HistoricoPage() {
   const qc = useQueryClient();
@@ -82,17 +83,22 @@ function HistoricoPage() {
                 {detail.message_sent}
               </p>
             )}
-            {detail.wts_errors && Object.values(detail.wts_errors).some((e) => !e.ok) && (
-              <div className="mt-3 rounded-lg bg-destructive-soft p-3 text-[12.5px] text-destructive">
-                {Object.entries(detail.wts_errors)
-                  .filter(([, v]) => !v.ok)
-                  .map(([k, v]) => (
+            {(() => {
+              // jsonb volta como string; Object.entries numa string devolve os
+              // caracteres um a um e renderiza lixo. Ver src/lib/jsonb.ts.
+              const erros = Object.entries(asObject<Record<string, WtsErrorEntry>>(detail.wts_errors))
+                .filter(([, v]) => v && typeof v === 'object' && !v.ok);
+              if (erros.length === 0) return null;
+              return (
+                <div className="mt-3 rounded-lg bg-destructive-soft p-3 text-[12.5px] text-destructive">
+                  {erros.map(([k, v]) => (
                     <p key={k}>
                       <span className="font-medium">{k}</span>: {v.error}
                     </p>
                   ))}
-              </div>
-            )}
+                </div>
+              );
+            })()}
           </div>
         )}
       </main>
