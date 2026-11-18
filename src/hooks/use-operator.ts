@@ -5,7 +5,9 @@ const KEY = 'odonto.operator';
 
 /**
  * Quem está operando. Vai para `actioned_by`, então precisa carregar a unidade
- * junto: existem dois Lucas de Sousa e "Lucas" sozinho não diz qual.
+ * junto: a Mathilde atende VH e SR e o nome sozinho não diz por qual delas a
+ * ação saiu. Valor antigo no localStorage que não existe mais na lista cai no
+ * primeiro item, então o "Lucas (VH)" gravado no navegador vira "Mathilde (VH)".
  */
 export const OPERATOR_OPTIONS = ATTENDANTS.map(displayName);
 

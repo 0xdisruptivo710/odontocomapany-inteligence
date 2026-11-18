@@ -96,13 +96,26 @@ export type Attendant = {
 };
 
 /**
- * ATENÇÃO: existem DOIS Lucas de Sousa, um por unidade, com userIds diferentes.
- * O nome sozinho é ambíguo — por isso `displayName` sempre carrega a unidade.
+ * O SDR Lucas saiu da OdontoCompany. O usuário dele na WTS (2683166d) foi
+ * RENOMEADO para Mathilde — mesmo id, outra pessoa — e é ela quem atende as duas
+ * unidades. Enquanto este mapa dizia "Lucas", TODA mensagem aprovada aqui saiu
+ * para o paciente assinada `*Lucas:*` (450 envios entre 07/08 e 18/11/2026).
+ * Nada a ver com o Dr. Lucas Bandiera, que é médico e segue na clínica: o nome
+ * dele no corpo do texto está correto, só a assinatura estava errada.
+ *
+ * A Mathilde aparece DUAS vezes, uma por unidade, porque cobre VH e SR e o
+ * seletor de operador é filtrado por unidade (`operatorsFor`). `attendantById`
+ * devolve a primeira ocorrência, e isso é inofensivo: a assinatura é a mesma e a
+ * unidade do envio vem de `row.unit_key`, nunca daqui.
+ *
+ * O userId c074380e ("Lucas de Sousa (ST)") saiu do mapa: não é mais agente na
+ * conta (GET /core/v1/agent, conferido em 26/10/2026). Sem entrada, a mensagem
+ * sai SEM assinatura, que é melhor que assinar com quem não trabalha mais aqui.
  */
 export const ATTENDANTS: Attendant[] = [
-  { userId: '2683166d-90d9-43ff-9150-24a480d226f4', name: 'Lucas De Sousa', signature: 'Lucas', unit: 'vh' },
+  { userId: '2683166d-90d9-43ff-9150-24a480d226f4', name: 'Mathilde', signature: 'Mathilde', unit: 'vh' },
   { userId: 'ca3d24a4-a22b-4401-b336-3f33fb781867', name: 'Tayná Miranda Silva', signature: 'Tayná', unit: 'vh' },
-  { userId: 'c074380e-16f8-4bbb-b745-ebe1c2b2c213', name: 'Lucas de Sousa', signature: 'Lucas', unit: 'sr' },
+  { userId: '2683166d-90d9-43ff-9150-24a480d226f4', name: 'Mathilde', signature: 'Mathilde', unit: 'sr' },
   { userId: '34cc5d65-1f87-4346-91b9-1fb88f654ba8', name: 'Matheus Soares', signature: 'Dr. Matheus', unit: 'sr' },
 ];
 
@@ -114,7 +127,7 @@ export function attendantById(userId: string | null | undefined): Attendant | nu
   return ATTENDANTS.find((a) => a.userId === userId) ?? null;
 }
 
-/** "Lucas (VH)" — sempre com a unidade, porque só o nome não distingue. */
+/** "Mathilde (VH)" — sempre com a unidade, porque só o nome não distingue. */
 export function displayName(a: Attendant): string {
   return `${a.signature} (${UNITS[a.unit].short})`;
 }
